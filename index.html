@@ -155,7 +155,6 @@ const fdate=s=>new Date(s).toLocaleDateString("th-TH",{day:"numeric",month:"shor
 
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY))||{};accs=d.accs||[];tx=d.tx||[];lts=d.ts||0;if(d.cfg)cfg=Object.assign(cfg,d.cfg)}catch(e){}}
 function save(){try{lts=Date.now();localStorage.setItem(KEY,JSON.stringify({accs,tx,cfg,ts:lts}));cloudQueue();return true}catch(e){alert("พื้นที่เก็บข้อมูลเต็ม ลองลบสลิปเก่าๆ ออกก่อน");return false}}
-
 function autoPost(){
   const now=today(),cur=now.slice(0,7);let ch=false;
   cfg.rec.forEach(r=>{let[y,m]=r.from.split("-").map(Number);
@@ -266,11 +265,11 @@ const setView=()=>{
   const co=["in","out"].map(k=>`<optgroup label="${k==="in"?"รายได้":"ค่าใช้จ่าย"}">${flat(k).map(c=>`<option value="${c[0]}"${c[0]==="rent"?" selected":""}>${c[1]} ${c[2]}</option>`).join("")}</optgroup>`).join("");
   const ao=accs.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("");
   const rec=cfg.rec.map(r=>`<div class="tx"><div class="ic">${lookup(r.cat)[1]}</div><div class="mid"><div>${lookup(r.cat)[2]} ${fmt(r.amount)}</div><small>ทุกวันที่ ${r.day} · ${esc(aName(r.acc))}</small></div><button class="x" data-a="rmrec" data-id="${r.id}">ลบ</button></div>`).join("");
-  return <div class="card"><h2>☁️ ซิงค์ Google Sheets</h2><div class="grid" style="margin-top:0"><div class="full"><label for="syu">ลิงก์ Web App</label><input id="syu" value="${esc(sy.url||"")}" placeholder="https://script.google.com/macros/s/.../exec"></div><div class="full"><label for="syk">รหัสลับ</label><input id="syk" value="${esc(sy.key||"")}"></div></div><button class="btn" data-a="sysave">เชื่อมต่อและซิงค์</button><div id="symsg" class="empty">${syMsg}</div></div>
-`<div class="card first"><h2>1) เงินเดือนต่อเดือน (บาท)</h2><input id="sal" type="number" inputmode="decimal" value="${cfg.salary||""}" placeholder="เช่น 20000" aria-label="เงินเดือน"></div>
+  return `<div class="card first"><h2>1) เงินเดือนต่อเดือน (บาท)</h2><input id="sal" type="number" inputmode="decimal" value="${cfg.salary||""}" placeholder="เช่น 20000" aria-label="เงินเดือน"></div>
   <div class="card"><h2>2) แบ่งเงินเดือนเป็น % <span id="plt" style="float:right;font-weight:400;font-size:14px">${planTotal()}</span></h2>${pl}</div>
   <div class="card"><h2>3) ตัดอัตโนมัติทุกเดือน</h2><small style="color:var(--mute)">เช่น ค่าหอ ค่าน้ำ ค่าไฟ หรือเงินเดือนเข้า ระบบบันทึกให้เองทุกเดือนตามวันที่ตั้งไว้ ถ้าจำนวนจริงไม่ตรง ให้ลบรายการนั้นในประวัติแล้วบันทึกใหม่</small>${rec||'<div class="empty">ยังไม่มีรายการ</div>'}
   ${accs.length?`<div class="grid"><div class="full"><label for="rcat">รายการ</label><select id="rcat">${co}</select></div><div><label for="ramt">จำนวนเงิน</label><input id="ramt" type="number" inputmode="decimal" placeholder="0"></div><div><label for="rday">ทุกวันที่ (1-31)</label><input id="rday" type="number" inputmode="numeric" min="1" max="31" value="1"></div><div class="full"><label for="racc">บัญชี</label><select id="racc">${ao}</select></div></div><button class="btn" data-a="addrec">เพิ่มรายการอัตโนมัติ</button>`:'<div class="empty">เพิ่มบัญชีด้านบนก่อน</div>'}</div>
+  <div class="card"><h2>☁️ ซิงค์ Google Sheets</h2><div class="grid" style="margin-top:0"><div class="full"><label for="syu">ลิงก์ Web App</label><input id="syu" value="${esc(sy.url||"")}" placeholder="https://script.google.com/macros/s/.../exec"></div><div class="full"><label for="syk">รหัสลับ</label><input id="syk" value="${esc(sy.key||"")}"></div></div><button class="btn" data-a="sysave">เชื่อมต่อและซิงค์</button><div id="symsg" class="empty">${esc(syMsg)}</div></div>
   <div class="card"><h2>ข้อมูล</h2><small style="color:var(--mute)">ใช้พื้นที่ประมาณ ${Math.round(JSON.stringify({accs,tx}).length/1024)} KB จากประมาณ 5,000 KB</small>
   <button class="btn soft" data-a="csv">⬇️ ดาวน์โหลดเดือนนี้เป็น CSV</button><button class="btn red" data-a="clear">🗑️ ลบบัญชีและรายการทั้งหมด</button></div>`};
 
@@ -373,8 +372,8 @@ document.addEventListener("click",e=>{
     if(!row.date.startsWith($("month").value))$("month").value=row.date.slice(0,7);
     pending=null;render();toast("บันทึกแล้ว ✓");
   }
- else if(a==="sysave"){sy={url:$("syu").value.trim(),key:$("syk").value.trim()};localStorage.setItem(SK,JSON.stringify(sy));if(!lts&&(tx.length||accs.length))save();setMsg("กำลังซิงค์...");pull()}
- else if(a==="csv"){
+  else if(a==="sysave"){sy={url:$("syu").value.trim(),key:$("syk").value.trim()};localStorage.setItem(SK,JSON.stringify(sy));if(!lts&&(tx.length||accs.length))save();setMsg("กำลังซิงค์...");pull()}
+  else if(a==="csv"){
     const m=$("month").value;
     const L=["วันที่,ประเภท,หมวด,บัญชี,จำนวนเงิน,รายละเอียด"].concat(tx.filter(x=>x.date.startsWith(m)).sort((p,q)=>p.date.localeCompare(q.date)).map(x=>
       [x.date,NAMES[x.type],x.type==="tf"?"โอน":lookup(x.cat)[2],x.type==="tf"?aName(x.from)+" → "+aName(x.to):aName(x.acc),x.amount,'"'+(x.note||"").replace(/"/g,'""')+'"'].join(",")));
@@ -392,7 +391,9 @@ document.addEventListener("change",async e=>{
     else if(t.id==="sfile"){const r=tx.find(x=>x.id==curId);if(r){r.img=img;if(save()){showTx(curId);render();toast("แนบสลิปแล้ว ✓")}else delete r.img}}
   }catch(err){toast("อ่านรูปไม่ได้ ลองเลือกรูปใหม่")}
   t.value="";
-});// ===== ซิงค์ Google Sheets =====
+});
+
+// ===== ซิงค์ Google Sheets =====
 const SK="rai-jai-sync";
 let lts=0,sy=JSON.parse(localStorage.getItem(SK)||"{}"),st=null,syMsg="";
 const strip=a=>a.map(({img,...r})=>r);
